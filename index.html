@@ -19,20 +19,20 @@
         <tab heading="Transmitter">
           <div ng-controller="ChartCtrl">
             <form class="apiUrl">
-              API Root: &nbsp;
+              API Root:
               <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
-              &nbsp; Transmitter ID: &nbsp;
+              Transmitter ID:
               <input type="text" ng-model="transmitterId" style="width:30%"  class="form-control"/>
-              From Min rssi of 
+              From Min rssi of: 
               <input type="text" ng-model="minRSSI" style="width:30%" class="form-control"/>
-              to Max rssi of
+              to Max rssi of:
               <input type="text" ng-model="maxRSSI" style="width:30%" class="form-control"/>
+              Max number of samples:
+              <input type="text" ng-model="maxNumberOfSamples" style="width:30%"  class="form-control"/>
               <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
-              <p> Max number of samples : <input type="text" ng-model="maxNumberOfSamples" style="width:30%"  class="form-control"/> </p>
             </form>
             <h1>RSSI in Time</h1>
-            <p> Tracking {{transmitterId}} </p>
-            <p>With the following receivers</p>
+            <p> Tracking {{transmitterId}} with the following receivers:</p>
             <ul>
               <li data-ng-repeat="x in receivers">
                 <button style ="background-color:{{x.color}}" class="btn btn"  ng-click="x.isDisplayed = !x.isDisplayed">
@@ -52,10 +52,12 @@
         <tab heading="Receiver">
           <div ng-controller="BarCtrl">
             <form class="apiUrl">
-              API Root: &nbsp;
+              API Root:
               <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
-              &nbsp; Receiver ID: &nbsp;
+              Receiver ID:
               <input type="text" ng-model="receiverId" style="width:30%"  class="form-control"/>
+              Samples to average:
+              <input type="text" ng-model="maxNumberOfSamplesAccessible" style="width:30%"  class="form-control"/>
               <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
               <p>
                 <button ng-click="isPaused = !isPaused" class="btn btn-primary">
@@ -64,10 +66,10 @@
                 <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
                   Discover Receivers {{isDiscovering? 'on' : 'off'}}
                 </button>
-                Averaging over past <input type="text" ng-model="maxNumberOfSamplesAccessible" style="width:30%"  class="form-control"/> data points.
               </p>
-              <p> Listening on {{receiverId}} </p>
             </form>
+            <h1>RSSI in Time</h1>
+            <p> Listening on {{receiverId}} </p>
             <div style="padding:30px" bar-chart chart-data= "displayData" update-chart="updateChart"></div>
           </div>
         </tab>
