@@ -18,19 +18,24 @@
       <tabset justified="true">
         <tab heading="Transmitter">
           <div ng-controller="ChartCtrl">
-            <form class="apiUrl">
-              API Root:
-              <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
-              Transmitter ID:
-              <input type="text" ng-model="transmitterId" style="width:30%"  class="form-control"/>
-              From Min rssi of: 
-              <input type="text" ng-model="minRSSI" style="width:30%" class="form-control"/>
-              to Max rssi of:
-              <input type="text" ng-model="maxRSSI" style="width:30%" class="form-control"/>
-              Max number of samples:
-              <input type="text" ng-model="maxNumberOfSamples" style="width:30%"  class="form-control"/>
-              <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
-            </form>
+            <div collapse="isTransmitterSettingsCollapsed">
+              <div class="well well-lg">
+                <form class="apiUrl">
+                  API Root:
+                  <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
+                  Transmitter ID:
+                  <input type="text" ng-model="transmitterId" style="width:30%"  class="form-control"/>
+                  From Min rssi of: 
+                  <input type="text" ng-model="minRSSI" style="width:30%" class="form-control"/>
+                  to Max rssi of:
+                  <input type="text" ng-model="maxRSSI" style="width:30%" class="form-control"/>
+                  Max number of samples:
+                  <input type="text" ng-model="maxNumberOfSamples" style="width:30%"  class="form-control"/>
+                  <button ng-click="updateFromUser()" class="btn btn-primary">Update Settings</button>
+                </form>
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="isTransmitterSettingsCollapsed = !isTransmitterSettingsCollapsed">Show/Hide Settings</button>
             <h1>RSSI in Time</h1>
             <p> Tracking {{transmitterId}} with the following receivers:</p>
             <ul>
@@ -51,23 +56,28 @@
         </tab>
         <tab heading="Receiver">
           <div ng-controller="BarCtrl">
-            <form class="apiUrl">
-              API Root:
-              <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
-              Receiver ID:
-              <input type="text" ng-model="receiverId" style="width:30%"  class="form-control"/>
-              Samples to average:
-              <input type="text" ng-model="maxNumberOfSamplesAccessible" style="width:30%"  class="form-control"/>
-              <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
-              <p>
-                <button ng-click="isPaused = !isPaused" class="btn btn-primary">
-                  Pause {{isPaused? 'on' : 'off'}}
-                </button>
-                <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
-                  Discover Receivers {{isDiscovering? 'on' : 'off'}}
-                </button>
-              </p>
-            </form>
+            <div collapse="isReceiverSettingsCollapsed">
+              <div class="well well-lg">
+                <form class="apiUrl">
+                  API Root:
+                  <input type="text" ng-model="apiRoot" style="width:30%" class="form-control"/>
+                  Receiver ID:
+                  <input type="text" ng-model="receiverId" style="width:30%"  class="form-control"/>
+                  Samples to average:
+                  <input type="text" ng-model="maxNumberOfSamplesAccessible" style="width:30%"  class="form-control"/>
+                  <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
+                  <p>
+                    <button ng-click="isPaused = !isPaused" class="btn btn-primary">
+                      Pause {{isPaused? 'on' : 'off'}}
+                    </button>
+                    <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
+                      Discover Receivers {{isDiscovering? 'on' : 'off'}}
+                    </button>
+                  </p>
+                </form>
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="isReceiverSettingsCollapsed = !isReceiverSettingsCollapsed">Show/Hide Settings</button>
             <h1>RSSI in Time</h1>
             <p> Listening on {{receiverId}} </p>
             <div style="padding:30px" bar-chart chart-data= "displayData" update-chart="updateChart"></div>

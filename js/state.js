@@ -138,6 +138,7 @@ angular.module('state', ['ui.bootstrap','btford.socket-io'])
       $scope.numReceivers = 0;
  
       // Accessible to the User. Display preference.
+      $scope.isTransmitterSettingsCollapsed = true;
       $scope.isDiscovering = true;
       $scope.minRSSI = 125;
       $scope.maxRSSI = 200;
@@ -455,6 +456,7 @@ angular.module('state', ['ui.bootstrap','btford.socket-io'])
       $scope.transmitters = {};
  
       // Accessible to the User. Display preference.
+      $scope.isReceiverSettingsCollapsed = true;
       $scope.isDiscovering = true;
       $scope.isPaused = false;
       $scope.maxNumberOfSamplesAccessible = 10;
