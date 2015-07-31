@@ -66,14 +66,14 @@
                   <div class="col-md-8"> <h3> Receiver ID </h3> </div>
                   <div class="col-md-4"> <h3> RSSI </h3> </div>
                 </div>
-                <div class="row" data-ng-repeat="x in receivers">
+                <div class="row" data-ng-repeat="receiver in receivers">
                   <div class="col-md-8">
-                    <button style ="background-color:{{x.color}}" class="btn btn" ng-click="x.isDisplayed = !x.isDisplayed">
-                      {{ x.receiverId }}
+                    <button style ="background-color:{{receiver.color}}" class="btn btn" ng-click="receiver.isDisplayed = !receiver.isDisplayed">
+                      {{receiver.receiverId}}
                     </button>
                   </div>
                   <div class="col-md-4">
-                    <label>{{x.latest}}</label>
+                    <label>{{receiver.latest}}</label>
                   </div>
                 </div>
               </div>           
