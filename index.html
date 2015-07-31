@@ -20,7 +20,7 @@
         <!----- Transmitter Interface ----->
         <tab heading="Transmitter">
           <div ng-controller="ChartCtrl">
-            <h1>{{transmitterId}} <small>RSSI of receivers in range</small></h1>
+            <h1>{{transmitterId}} <small>is decoded by these nearby receivers</small></h1>
             <div collapse="isTransmitterSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -84,7 +84,7 @@
         <!----- Receiver Interface ----->
         <tab heading="Receiver">
           <div ng-controller="BarCtrl">
-            <h1>{{receiverId}} <small>RSSI values of transmitters in range</small></h1>
+            <h1>{{receiverId}} <small>is decoding these nearby transmitters</small></h1>
             <div collapse="isReceiverSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -122,13 +122,13 @@
         <!----- Events Interface ----->
         <tab heading="Events">
           <div ng-controller="SocketCtrl" >
-            <h1>Real-time Events <small>Thanks to the magic of websockets</small></h1>
+            <h1>Real-time Events <small>thanks to the magic of websockets</small></h1>
             <div collapse="isEventsSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
                   <div class="form-group">
                     <label for="eAPI">Websocket URL:</label>
-                    <input id="eAPI" type="text" ng-model="socket.url" class="form-control" size="32"/>
+                    <input id="eAPI" type="text" ng-model="socket.url" class="form-control" size="32" readonly/>
                   </div>
                 </form>
               </div>
