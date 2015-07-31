@@ -3,8 +3,8 @@ MAX_NUMBER_OF_EVENTS = 10;
 WHEREIS_QUERY = '/whereis/transmitter/';
 WHATAT_QUERY = '/whatat/receiver/';
 DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com/';
-DEFAULT_TRANSMITTER_ID = '5c313e5234dc';
-DEFAULT_RECEIVER_ID = '001bc50940810074';
+DEFAULT_TRANSMITTER_ID = '1005ecab005e';
+DEFAULT_RECEIVER_ID = '001bc50940810013';
 DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + 'websocket';
 cCOlOR = 0;
 DEFAULT_COLORS_ARRAY = ['#0770a2',
@@ -14,12 +14,12 @@ DEFAULT_COLORS_ARRAY = ['#0770a2',
                         '#ffc712'];
  
  
-angular.module('state', ['ui.bootstrap','btford.socket-io'])
+angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
  
   // ----- Interaction controller -----
   .controller("InteractionCtrl", function($scope) {
  
-    //Used to communicate between tabs
+    // Used to communicate between tabs
     $scope.updateTransmitterFromReceiver = false;
     var newTransmitterId = DEFAULT_TRANSMITTER_ID;
     $scope.setNewTransmitterId = function(newVal) {newTransmitterId = newVal;}
