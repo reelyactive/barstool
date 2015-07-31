@@ -5,7 +5,7 @@ WHATAT_QUERY = '/whatat/receiver/';
 DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com/';
 DEFAULT_TRANSMITTER_ID = '5c313e5234dc';
 DEFAULT_RECEIVER_ID = '001bc50940810074';
-DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + '/websocket';
+DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + 'websocket';
 cCOlOR = 0;
 DEFAULT_COLORS_ARRAY = ['#0770a2',
                         '#ff6900',
@@ -63,6 +63,7 @@ angular.module('state', ['ui.bootstrap','btford.socket-io'])
  
   // Socket.io controller
   .controller('SocketCtrl', function($scope, Socket) {
+    $scope.isEventsSettingsCollapsed = true;
     $scope.socket = { url: DEFAULT_SOCKET_URL };
     $scope.events = [];
  

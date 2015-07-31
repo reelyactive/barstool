@@ -16,6 +16,8 @@
     <header>reelyActive barstool</header>
     <div ng-controller="InteractionCtrl">
       <tabset justified="true">
+
+        <!----- Transmitter Interface ----->
         <tab heading="Transmitter">
           <div ng-controller="ChartCtrl">
             <h1>{{transmitterId}} <small>RSSI of receivers in range</small></h1>
@@ -57,16 +59,29 @@
             <button ng-click="isPaused = !isPaused" class="btn btn-primary">
               {{isPaused? 'Paused' : 'Running'}}
             </button>
-            <div style="padding:0px" linear-chart chart-data="rssiSamples" update-chart="updateChart"></div>
-            <ul>
-              <li data-ng-repeat="x in receivers">
-                <button style ="background-color:{{x.color}}" class="btn btn"  ng-click="x.isDisplayed = !x.isDisplayed">
-                  {{ x.receiverId }}_{{x.latest}}_ {{x.isDisplayed? 'show':'hide' }}
-                </button>
-              </li>
-            </ul>
+            <div class="row">
+              <div class="col-md-9" linear-chart chart-data="rssiSamples" update-chart="updateChart"></div>
+              <div class="col-md-3">
+                <div class="row">
+                  <div class="col-md-8"> <h3> Receiver ID </h3> </div>
+                  <div class="col-md-4"> <h3> RSSI </h3> </div>
+                </div>
+                <div class="row" data-ng-repeat="x in receivers">
+                  <div class="col-md-8">
+                    <button style ="background-color:{{x.color}}" class="btn btn" ng-click="x.isDisplayed = !x.isDisplayed">
+                      {{ x.receiverId }}
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+                    <label>{{x.latest}}</label>
+                  </div>
+                </div>
+              </div>           
+            </div>
           </div>
         </tab>
+
+        <!----- Receiver Interface ----->
         <tab heading="Receiver">
           <div ng-controller="BarCtrl">
             <h1>{{receiverId}} <small>RSSI values of transmitters in range</small></h1>
@@ -103,12 +118,24 @@
             <div style="padding:30px" bar-chart chart-data= "displayData" update-chart="updateChart"></div>
           </div>
         </tab>
-        <tab heading="Event">
+
+        <!----- Events Interface ----->
+        <tab heading="Events">
           <div ng-controller="SocketCtrl" >
-            <form class="apiUrl">
-              Socket URL:
-              <input type="text" ng-model="socket.url" style="width:30%"  class="form-control" readonly/>
-            </form>
+            <h1>Real-time Events <small>Thanks to the magic of websockets</small></h1>
+            <div collapse="isEventsSettingsCollapsed">
+              <div class="well well-lg">
+                <form class="form-inline">
+                  <div class="form-group">
+                    <label for="eAPI">Websocket URL:</label>
+                    <input id="eAPI" type="text" ng-model="socket.url" class="form-control" size="32"/>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="isEventsSettingsCollapsed = !isEventsSettingsCollapsed">
+              {{isEventsSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
+            </button>
             <div ng-repeat="(id, event) in events">
               <div>
                 <pre> {{id}}: {{event}} </pre>
