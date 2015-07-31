@@ -18,7 +18,7 @@
       <tabset justified="true">
         <tab heading="Transmitter">
           <div ng-controller="ChartCtrl">
-            <h1>RSSI of {{transmitterId}} in Time</h1>
+            <h1>{{transmitterId}} <small>RSSI of receivers in range</small></h1>
             <div collapse="isTransmitterSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -48,12 +48,14 @@
                 </form>
               </div>
             </div>
-            <button class="btn btn-primary" ng-click="isTransmitterSettingsCollapsed = !isTransmitterSettingsCollapsed">Show/Hide Settings</button>
+            <button class="btn btn-primary" ng-click="isTransmitterSettingsCollapsed = !isTransmitterSettingsCollapsed">
+              {{isTransmitterSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
+            </button>
             <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary" >
-              Discover Receivers {{isDiscovering? 'on' : 'off'}}
+              {{isDiscovering? 'Discovering Receivers' : 'Discovery Disabled'}}
             </button>
             <button ng-click="isPaused = !isPaused" class="btn btn-primary">
-              Pause {{isPaused? 'on' : 'off'}}
+              {{isPaused? 'Paused' : 'Running'}}
             </button>
             <div style="padding:0px" linear-chart chart-data="rssiSamples" update-chart="updateChart"></div>
             <ul>
@@ -67,7 +69,7 @@
         </tab>
         <tab heading="Receiver">
           <div ng-controller="BarCtrl">
-            <h1>RSSI values on {{receiverId}} in Time</h1>
+            <h1>{{receiverId}} <small>RSSI values of transmitters in range</small></h1>
             <div collapse="isReceiverSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -89,12 +91,14 @@
                 </form>
               </div>
             </div>
-            <button class="btn btn-primary" ng-click="isReceiverSettingsCollapsed = !isReceiverSettingsCollapsed">Show/Hide Settings</button>
-            <button ng-click="isPaused = !isPaused" class="btn btn-primary">
-              Pause {{isPaused? 'on' : 'off'}}
+            <button class="btn btn-primary" ng-click="isReceiverSettingsCollapsed = !isReceiverSettingsCollapsed">
+              {{isReceiverSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
             </button>
             <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
-              Discover Receivers {{isDiscovering? 'on' : 'off'}}
+              {{isDiscovering? 'Discovering Transmitters' : 'Discovery Disabled'}}
+            </button>
+            <button ng-click="isPaused = !isPaused" class="btn btn-primary">
+              {{isPaused? 'Paused' : 'Running'}}
             </button>
             <div style="padding:30px" bar-chart chart-data= "displayData" update-chart="updateChart"></div>
           </div>
