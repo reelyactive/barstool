@@ -18,38 +18,9 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
  
   // ----- Interaction controller -----
   .controller("InteractionCtrl", function($scope) {
- 
-    // Used to communicate between tabs
-    $scope.updateTransmitterFromReceiver = false;
-    var newTransmitterId = DEFAULT_TRANSMITTER_ID;
-    $scope.setNewTransmitterId = function(newVal) {newTransmitterId = newVal;}
-    $scope.getNewTransmitterId = function() {return newTransmitterId;}
- 
 
-    $scope.hideme = true;
-    
-    $scope.show = { transmitter: true, receiver: false, events: false };
-    $scope.tabclass = { transmitter: 'selected-tab', receiver: 'tab',
-                        events: 'tab' };
- 
-    $scope.selectTransmitter = function() {
-      $scope.show = { transmitter: true, receiver: false, events: false };
-      $scope.tabclass = { transmitter: 'selected-tab', receiver: 'tab',
-                          events: 'tab' };
-    }
- 
-    $scope.selectReceiver = function() {
-      $scope.show = { transmitter: false, receiver: true, events: false };
-      $scope.tabclass = { transmitter: 'tab', receiver: 'selected-tab', 
-                          events: 'tab'};
-    }
- 
-    $scope.selectEvents = function() {
-      $scope.show = { transmitter: false, receiver: false, events: true };
-      $scope.tabclass = { transmitter: 'tab', receiver: 'tab',
-                          events: 'selected-tab' };
-    }
- 
+    // TODO: interaction between tabs 
+
   })
  
  
@@ -145,10 +116,10 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     $scope.maxNumberOfSamples = 10;
     $scope.updateChart = true; // Each time this value changes, the chart is being updated.
      
-    $scope.$watch($scope.getNewTransmitterId, function() {
-      $scope.transmitterId = $scope.getNewTransmitterId();
-      $scope.updateFromUser();
-    });
+    //$scope.$watch($scope.getNewTransmitterId, function() {
+    //  $scope.transmitterId = $scope.getNewTransmitterId();
+    //  $scope.updateFromUser();
+    //});
 
     // Poll the Transmitter Samples service for the latest data
     function updateFromService() {
@@ -243,6 +214,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     }
  
     $interval(updateFromService , REFRESH_SECONDS * 1000);
+    $scope.updateFromUser();
 
   }])
  
@@ -490,7 +462,6 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     function updateRssiSamples(sample) {
       for(var transmitterTemp in $scope.transmitters) {
         if(!(transmitterTemp in $scope.rssiSamples)) {
-          console.log('Creating new transmitter rssiSamples!');
           $scope.rssiSamples[transmitterTemp];
           $scope.rssiSamples[transmitterTemp] = [];
         }
