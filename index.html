@@ -13,7 +13,7 @@
     <script type="text/javascript" src="js/state.js"></script>
   </head>
   <body ng-app="state">
-    <header>reelyActive Barstool</header>
+    <header>reelyActive barstool</header>
     <div ng-controller="InteractionCtrl">
       <tabset justified="true">
         <tab heading="Transmitter">
@@ -36,14 +36,14 @@
             <ul>
               <li data-ng-repeat="x in receivers">
                 <button style ="background-color:{{x.color}}" class="btn btn"  ng-click="x.isDisplayed = !x.isDisplayed">
-                {{ x.receiverId }}_{{x.latest}}_ {{x.isDisplayed? 'show':'hide' }}
+                  {{ x.receiverId }}_{{x.latest}}_ {{x.isDisplayed? 'show':'hide' }}
                 </button>
               </li>
               <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary" >
-              Discover Receivers {{isDiscovering? 'on' : 'off'}}
+                Discover Receivers {{isDiscovering? 'on' : 'off'}}
               </button>
               <button ng-click="isPaused = !isPaused" class="btn btn-primary">
-              Pause {{isPaused? 'on' : 'off'}}
+                Pause {{isPaused? 'on' : 'off'}}
               </button>
             </ul>
             <div style="padding:30px" linear-chart chart-data="rssiSamples" update-chart="updateChart"></div>
@@ -59,10 +59,10 @@
               <button ng-click="updateFromUser()" class="btn btn-primary">Update</button>
               <p>
                 <button ng-click="isPaused = !isPaused" class="btn btn-primary">
-                Pause {{isPaused? 'on' : 'off'}}
+                  Pause {{isPaused? 'on' : 'off'}}
                 </button>
                 <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
-                Discover Receivers {{isDiscovering? 'on' : 'off'}}
+                  Discover Receivers {{isDiscovering? 'on' : 'off'}}
                 </button>
                 Averaging over past <input type="text" ng-model="maxNumberOfSamplesAccessible" style="width:30%"  class="form-control"/> data points.
               </p>
@@ -87,6 +87,9 @@
       </tabset>
     </div>
     <footer id="footer">
-    <a href="https://github.com/reelyactive/barstool"> barstool </a>
-    &nbsp; | &nbsp;
-    <a href="http://context.reelyactive.com"> &copy; reelyActive 2015 </a>
+      <a href="https://github.com/reelyactive/barstool"> barstool </a>
+      &nbsp; | &nbsp;
+      <a href="http://context.reelyactive.com"> &copy; reelyActive 2015 </a>
+    </footer>
+  </body>
+</html>
