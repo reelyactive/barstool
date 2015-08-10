@@ -69,10 +69,12 @@
             <button class="btn btn-primary" ng-click="isTransmitterSettingsCollapsed = !isTransmitterSettingsCollapsed">
               {{isTransmitterSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
             </button>
-            <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary" >
+            <button ng-click="isDiscovering = !isDiscovering" class="btn
+                    ngclass: {{isDiscovering? 'btn-success' : 'btn-warning'}}">
               {{isDiscovering? 'Discovering Receivers' : 'Discovery Disabled'}}
             </button>
-            <button ng-click="isPaused = !isPaused" class="btn btn-primary">
+            <button ng-click="isPaused = !isPaused" class="btn
+                    ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
               {{isPaused? 'Paused' : 'Running'}}
             </button>
             <div class="row">
@@ -125,10 +127,12 @@
             <button class="btn btn-primary" ng-click="isReceiverSettingsCollapsed = !isReceiverSettingsCollapsed">
               {{isReceiverSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
             </button>
-            <button ng-click="isDiscovering = !isDiscovering" class="btn btn-primary">
+            <button ng-click="isDiscovering = !isDiscovering" class="btn
+                    ngclass: {{isDiscovering? 'btn-success' : 'btn-warning'}}">
               {{isDiscovering? 'Discovering Transmitters' : 'Discovery Disabled'}}
             </button>
-            <button ng-click="isPaused = !isPaused" class="btn btn-primary">
+            <button ng-click="isPaused = !isPaused" class="btn
+                    ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
               {{isPaused? 'Paused' : 'Running'}}
             </button>
             <div style="padding:30px" bar-chart chart-data= "displayData" update-chart="updateChart"></div>
@@ -157,6 +161,78 @@
                 <pre> {{id}}: {{event}} </pre>
               </div>
             </div>
+          </div>
+        </tab>
+
+        <!----- Location Interface ----->
+        <tab heading="Location">
+          <div ng-controller="LocationCtrl" >
+            <h1>{{locationId}} <small>where are you?</small></h1>
+            <div collapse="isLocationSettingsCollapsed">
+              <div class="well well-lg">
+                <form class="form-inline">
+                  <div class="form-group">
+                    <label for="lAPI">API Root:</label>
+                    <input id="lAPI" type="text" ng-model="apiRoot"
+                           class="form-control" size="32"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="lID">&nbsp; Transmitter ID:</label>
+                    <input id="lID" type="text" ng-model="locationId"
+                           class="form-control" size="16" maxlength="16"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="lMin">&nbsp; Min RSSI:</label>
+                    <input id="lMin" type="text" ng-model="minRSSI"
+                           class="form-control" size="3" maxlength="3"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="lMax">&nbsp; Max RSSI:</label>
+                    <input id="lMax" type="text" ng-model="maxRSSI"
+                           class="form-control" size="3" maxlength="3"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="lCells">&nbsp; Cells/side:</label>
+                    <input id="lCells" type="text" class="form-control"
+                           ng-model="numberOfCellsPerSide" size="3"
+                           maxlength="3"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="lSquares">&nbsp; Squares/meter:</label>
+                    <input id="lSquares" type="text" class="form-control"
+                           ng-model="squaresPerMeter" size="3"
+                           maxlength="3"/>
+                  </div>
+                  <div class="form-group btn-group">
+                    <label class="btn btn-default" ng-model="frequencyMHz"
+                           btn-radio="2400">2400MHz</label>
+                    <label class="btn btn-default" ng-model="frequencyMHz"
+                           btn-radio="915">915MHz</label>
+                  </div>
+                  <div class="form-group btn-group">
+                    <label class="btn btn-default" ng-model="scale"
+                           btn-radio="'log'">Log Scale</label>
+                    <label class="btn btn-default" ng-model="scale"
+                           btn-radio="'home'">Home Scale</label>
+                  </div>
+                  <div class="form-group">
+                    <button ng-click="updateFromUser()" class="btn btn-primary">Apply Settings</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <button class="btn btn-primary" ng-click="isLocationSettingsCollapsed = !isLocationSettingsCollapsed">
+              {{isLocationSettingsCollapsed? 'Show Settings' : 'Hide Settings'}}
+            </button>
+            <button ng-click="isDiscovering = !isDiscovering" class="btn
+                    ngclass: {{isDiscovering? 'btn-success' : 'btn-warning'}}">
+              {{isDiscovering? 'Discovering Receivers' : 'Discovery Disabled'}}
+            </button>
+            <button ng-click="isPaused = !isPaused" class="btn
+                    ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
+              {{isPaused? 'Paused' : 'Running'}}
+            </button>
+            <!-- Visualisation code goes here -->
           </div>
         </tab>
       </tabset>

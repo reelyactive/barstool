@@ -5,7 +5,10 @@ WHATAT_QUERY = '/whatat/receiver/';
 DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com/';
 DEFAULT_TRANSMITTER_ID = '1005ecab005e';
 DEFAULT_RECEIVER_ID = '001bc50940810013';
+DEFAULT_LOCATION_ID = '001bc509401000a1';
 DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + 'websocket';
+DEFAULT_MIN_RSSI = 100;
+DEFAULT_MAX_RSSI = 200;
 cCOlOR = 0;
 DEFAULT_COLORS_ARRAY = ['#0770a2',
                         '#ff6900',
@@ -658,4 +661,24 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
           }
         }
       }
+  })
+
+  // ----- Location controller -----
+  .controller("LocationCtrl", function($scope) {
+    $scope.apiRoot = DEFAULT_API_ROOT;
+    $scope.locationId = DEFAULT_LOCATION_ID;
+    $scope.minRSSI = DEFAULT_MIN_RSSI;
+    $scope.maxRSSI = DEFAULT_MAX_RSSI;
+    $scope.numberOfCellsPerSide = 10;
+    $scope.squaresPerMeter = 1;
+    $scope.frequencyMHz = 915;
+    $scope.scale = 'log';
+    $scope.isLocationSettingsCollapsed = true;
+    $scope.isDiscovering = true;
+    $scope.isPaused = true;
+
+    // User updates settings
+    $scope.updateFromUser = function () {
+      
+    }
   });
