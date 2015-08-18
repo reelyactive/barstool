@@ -31,12 +31,15 @@
              ng-click="navCollapsed = true">
         </div>
       </nav>
-      <tabset>
+      <tabset justified="true">
 
         <!----- Transmitter Interface ----->
-        <tab heading="Transmitter">
+        <tab heading="Transmitter" active="tabs[0].active"> 
           <div ng-controller="ChartCtrl">
-            <h1>{{transmitterId}} <small>is decoded by these nearby receivers</small></h1>
+            <h1>{{transmitterId}} 
+              <small>is {{transmitterConnectivity? 'decoded by these nearby receivers': 'not responding.'}}
+              </small>
+            </h1>
             <div collapse="isTransmitterSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -60,8 +63,17 @@
                     <label for="tSamples">&nbsp; Samples:</label>
                     <input id="tSamples" type="text" ng-model="maxNumberOfSamplesAccessible" class="form-control" size="2" maxlength="2"/>
                   </div>
+                  
+                  <div class="form-group btn-group">
+                    <label class="btn btn-default" ng-model="interpolate"
+                           btn-radio="'Linear'">Linear Interpolation</label>
+                    <label class="btn btn-default" ng-model="interpolate"
+                           btn-radio="'basis'">Basis Interpolation</label>
+                  </div>
+                  
                   <div class="form-group">
                     <button ng-click="updateFromUser()" class="btn btn-primary">Apply Settings</button>
+                    
                   </div>
                 </form>
               </div>
@@ -86,12 +98,14 @@
                 </div>
                 <div class="row" data-ng-repeat="receiver in receivers">
                   <div class="col-md-8">
-                    <button style ="background-color:{{receiver.color}}" class="btn btn" ng-click="receiver.isDisplayed = !receiver.isDisplayed">
+                    <button style ="background-color:{{receiver.color}}" class="btn btn" ng-click="followReceiver(receiver.receiverId)">
                       {{receiver.receiverId}}
                     </button>
                   </div>
                   <div class="col-md-4">
-                    <label>{{receiver.latest}}</label>
+                    <button style ="background-color:{{receiver.color}}" class="btn btn" ng-click="receiver.isDisplayed = !receiver.isDisplayed">
+                      {{receiver.latest}} : {{receiver.isDisplayed? 'show':'hide' }}
+                    </button>
                   </div>
                 </div>
               </div>           
@@ -100,9 +114,11 @@
         </tab>
 
         <!----- Receiver Interface ----->
-        <tab heading="Receiver">
+        <tab heading="Receiver" active="tabs[1].active"> 
           <div ng-controller="BarCtrl">
-            <h1>{{receiverId}} <small>is decoding these nearby transmitters</small></h1>
+            <h1>{{receiverId}} 
+              <small>is {{receiverConnectivity? 'decoding these nearby transmitters' : 'not responding.'}}
+              </small></h1>
             <div collapse="isReceiverSettingsCollapsed">
               <div class="well well-lg">
                 <form class="form-inline">
@@ -117,6 +133,10 @@
                   <div class="form-group">
                     <label for="rSamples">&nbsp; Samples:</label>
                     <input id="rSamples" type="text" ng-model="maxNumberOfSamplesAccessible" class="form-control" size="2" maxlength="2"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="rTransmitters">&nbsp; Max :</label>
+                    <input id="rTransmitters" type="text" ng-model="maxNumberOfTransmittersAccessible" class="form-control" size="2" maxlength="2"/>
                   </div>
                   <div class="form-group">
                     <button ng-click="updateFromUser()" class="btn btn-primary">Apply Settings</button>
@@ -140,7 +160,7 @@
         </tab>
 
         <!----- Events Interface ----->
-        <tab heading="Events">
+        <tab heading="Events" active="tabs[2].active"> 
           <div ng-controller="SocketCtrl" >
             <h1>Real-time Events <small>thanks to the magic of websockets</small></h1>
             <div collapse="isEventsSettingsCollapsed">
@@ -165,7 +185,7 @@
         </tab>
 
         <!----- Location Interface ----->
-        <tab heading="Location">
+        <tab heading="Location" active="tabs[3].active"> 
           <div ng-controller="LocationCtrl" >
             <h1>{{locationId}} <small>where are you?</small></h1>
             <div collapse="isLocationSettingsCollapsed">
@@ -194,7 +214,7 @@
                   <div class="form-group">
                     <label for="lCells">&nbsp; Cells/side:</label>
                     <input id="lCells" type="text" class="form-control"
-                           ng-model="numberOfCellsPerSide" size="3"
+                           ng-model="numberOfCellsPerSideAccessible" size="3"
                            maxlength="3"/>
                   </div>
                   <div class="form-group">
@@ -216,7 +236,7 @@
                            btn-radio="'home'">Home Scale</label>
                   </div>
                   <div class="form-group">
-                    <button ng-click="updateFromUser()" class="btn btn-primary">Apply Settings</button>
+                    <button ng-click="updateFromUser()" class="btn btn-primary">Apply Context</button>
                   </div>
                 </form>
               </div>
@@ -233,6 +253,36 @@
               {{isPaused? 'Paused' : 'Running'}}
             </button>
             <!-- Visualisation code goes here -->
+            <div class="row">
+              <div class="col-md-9" location-chart chart-data="rssiSamples" update-chart="updateChart"></div>
+              <div class="col-md-3">
+                <div class="row">
+                  <div class="col-md-8"> <h3> Receiver ID </h3> </div>
+                  <div class="col-md-4"> <h3> RSSI </h3> </div>
+                </div>
+                <div class="row" data-ng-repeat="x in receivers">
+                  <div class="col-md-8">
+                    <button style ="background-color:{{x.color}}" class="btn btn" ng-click="x.isDisplayed = !x.isDisplayed">
+                      {{ x.receiverId }}
+                    </button>
+
+                    <div class="form-group">
+                    
+                    X : <input type="text" ng-model="x.xCoordinate" class="form-control" size="2" maxlength="3"/>
+                    
+                    Y : <input type="text" ng-model="x.yCoordinate" class="form-control" size="2" maxlength="3"/>
+                  </div>
+
+                  </div>
+                  <div class="col-md-4">
+                    <button style ="background-color:{{x.color}}" class="btn btn" ng-click="x.isConsidered = !x.isConsidered">
+                      {{ x.latest }}  {{x.isConsidered? 'Ok' : 'Ignored'}}
+                    </button>
+
+                  </div>
+                </div>
+              </div>           
+            </div>
           </div>
         </tab>
       </tabset>
