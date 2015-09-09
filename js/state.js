@@ -1,39 +1,84 @@
-
-REFRESH_SECONDS = 1;
-
-DEFAUTL_MAX_TRANSMITTERS = 20; // Each transnmitter is adding 30 pixels to the svg canvas.
-MAX_NUMBER_OF_EVENTS = 10;
-PATH_LOSS_EXPONENT = 2;
+/**
+ * Copyright reelyActive 2015
+ * We believe in an open Internet of Things
+ */
 
 
-WHEREIS_QUERY = '/whereis/transmitter/';
-WHATAT_QUERY = '/whatat/receiver/';
+/* --- GENERAL --- */
 
 
-DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com/';
+  // Parameters
+  REFRESH_SECONDS = 1; // Polling rate and refresh display rate.
+  WHEREIS_QUERY = '/whereis/transmitter/'; // Specifying the query.
+  WHATAT_QUERY = '/whatat/receiver/'; // Specifying the query.
+  COLORS_ARRAY = ['#0770a2',
+                          '#ff6900',
+                          '#aec844',
+                          '#5a5a5a',
+                          '#ffc712'];
 
-DEFAULT_TRANSMITTER_CANVAS_W = 1000;
-DEFAULT_TRANSMITTER_CANVAS_H = 500;
+  // User default values
+  DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com';
+  DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + '/websocket';
+  DEFAULT_MIN_RSSI = 0;
+  DEFAULT_MAX_RSSI = 200;
+  DEFAULT_MAX_SAMPLES = 10;
 
-DEFAULT_RECEIVER_CANVAS_W = 1000;
-DEFAULT_RECEIVER_CANVAS_H = 350;
+  // Misc
+  cCOlOR_TRANSMITTER = 0;
+  cCOlOR_LOCATION = 0;
 
-DEFAULT_CELL_SIDE = 40;
+/* --- TRANSMITTER --- */
 
-DEFAULT_TRANSMITTER_ID = '1005ecab005e';
-DEFAULT_RECEIVER_ID = '001bc50940810013';
-DEFAULT_LOCATION_ID = '1005ecab005e';
-DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + 'websocket';
+  // Parameters
+  TRANSMITTER_CANVAS_W = 1000;
+  TRANSMITTER_CANVAS_H = 500;
 
-DEFAULT_MIN_RSSI = 0;
-DEFAULT_MAX_RSSI = 200;
-LINEAR_FACTOR = 0.1;  
-cCOlOR = 0;
-DEFAULT_COLORS_ARRAY = ['#0770a2',
-                        '#ff6900',
-                        '#aec844',
-                        '#5a5a5a',
-                        '#ffc712'];
+  // User default values
+  DEFAULT_TRANSMITTER_ID = '1005ecab005e';
+
+
+/* --- RECEIVER --- */
+
+  // Parameters
+  RECEIVER_CANVAS_W = 1000;
+  RECEIVER_CANVAS_H = 350;
+  RECEIVER_PADDING = 30;
+  RECEIVER_BARSW = 10; // Pixels for the bars side.
+  RECEIVER_BARS_TRANSMITTERS = 3; // Number of bars per transmitter.
+  RECEIVER_BARS_SPACE = 2; // Pixels between bars.
+  RECEIVER_TRANSMITTER_SPACE = 3; // Pixels between transmitters.
+
+  // User default values
+  DEFAULT_RECEIVER_ID = '001bc50940810013';
+  DEFAULT_MAX_TRANSMITTERS = 20; // Each transnmitter is adding 30 pixels to the svg canvas.
+  
+/* --- EVENT --- */
+
+  // Parameters
+  MAX_NUMBER_OF_EVENTS = 10;
+
+  // User default values
+
+/* --- Location --- */
+
+  // Parameters
+  PATH_LOSS_EXPONENT = 2;
+  LINEAR_FACTOR = 0.1; 
+  LOCATION_SIDE = 800; // Number of pixels for one side of the SVG canvas.
+  MINIMUM_CIRCLE_SIZE = 7;
+  SCALE_WIDTH = 10;
+  // User default values
+  DEFAULT_SCALE = 'home'
+  DEFAULT_LOCATION_MAXRSSI = 185;
+  DEFAULT_LOCATION_MINRSSI = 100;
+  DEFAULT_CELL_SIDE = 40;
+  DEFAULT_LOCATION_ID = '1005ecab005e';
+  DEFAULT_FREQUENCY = 2400;
+  DEFAULT_MERGER = 'global';
+
+
+
  
  
 angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
@@ -180,8 +225,8 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     $scope.minRSSI = DEFAULT_MIN_RSSI;
     $scope.maxRSSI = DEFAULT_MAX_RSSI;
     $scope.isPaused = false;
-    $scope.maxNumberOfSamplesAccessible = 10;
-    $scope.maxNumberOfSamples = 10;
+    $scope.maxNumberOfSamplesAccessible = DEFAULT_MAX_SAMPLES;
+    $scope.maxNumberOfSamples = DEFAULT_MAX_SAMPLES;
     $scope.updateChart = true; // Each time this value changes, the chart is being updated.
     
     // Watching when we are switching to the transmitter tab from another tab.
@@ -190,10 +235,6 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
       console.log("Displaying the new transmitter!");
     });
 
-
-    $scope.followReceiver = function(receiverId) {
-      $scope.goToReceiverTab(receiverId);
-    }
 
     
     // User updates settings
@@ -216,18 +257,22 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     // Updating the data.
     function updateFromService() {
 
-      var sample = transmitterSamples.getLatest(); // Using the service to get most recent data.
-      $scope.setTransmitterConnectivity(transmitterSamples.getConnectionStatus()); // Displaying whether we are connected.
 
-      if(sample && sample[$scope.transmitterId]) { // Checking data integrity.
-        if($scope.isDiscovering) { 
-          updateReceivers(sample); // Update the receivers if on discovery mode.
+        $scope.setTransmitterConnectivity(transmitterSamples.getConnectionStatus()); // Displaying whether we are connected.
+
+        if(!$scope.isPaused) { // If not on paused, update latest attribute.
+
+        var sample = transmitterSamples.getLatest(); // Using the service to get most recent data.
+
+        if(sample && sample[$scope.transmitterId]) { // Checking data integrity.
+          if($scope.isDiscovering) { 
+            updateReceivers(sample); // Update the receivers if on discovery mode.
+          }
+          updateRssiArray(sample); // Update the data.
+          $scope.rssiSeconds += REFRESH_SECONDS; // Refresh the time.
         }
-        updateRssiArray(sample); // Update the data.
-        $scope.rssiSeconds += REFRESH_SECONDS; // Refresh the time.
-      }
 
-      if(!$scope.isPaused) { // If not on paused, update latest attribute.
+        
         for(var receiverTemp in $scope.receivers) {
           var indexOfLatest = $scope.rssiSamples[receiverTemp].length - 1;
           $scope.receivers[receiverTemp].latest = $scope.rssiSamples[receiverTemp][indexOfLatest].rssi;
@@ -241,7 +286,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
             cRadio++) {
           var receiverTemp = sample[$scope.transmitterId].radioDecodings[cRadio].identifier.value;
           if(!(receiverTemp in $scope.receivers)) {
-            var colorTemp = DEFAULT_COLORS_ARRAY[cCOlOR++ % DEFAULT_COLORS_ARRAY.length];
+            var colorTemp = COLORS_ARRAY[cCOlOR_TRANSMITTER++ % COLORS_ARRAY.length];
             $scope.receivers[receiverTemp] = { color: colorTemp, isDrawn: false, isDisplayed: true, latest: 0, receiverId: receiverTemp };
           }
         }
@@ -303,7 +348,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
   .directive('linearChart',  function($parse, $window) {
     return {
       restrict: "EA",
-      template: "<svg width='" + DEFAULT_TRANSMITTER_CANVAS_W + "' height='" + DEFAULT_TRANSMITTER_CANVAS_H+ "'></svg>",
+      template: "<svg width='" + TRANSMITTER_CANVAS_W + "' height='" + TRANSMITTER_CANVAS_H+ "'></svg>",
       link:
         function(scope, elem, attrs) {
 
@@ -314,8 +359,8 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
           // Parameters
           var padding = 40;
-          var canvasH = DEFAULT_TRANSMITTER_CANVAS_H;
-          var canvasW = DEFAULT_TRANSMITTER_CANVAS_W;
+          var canvasH = TRANSMITTER_CANVAS_H;
+          var canvasW = TRANSMITTER_CANVAS_W;
 
           // Scales and axis.
           var xScale; // Dynamic
@@ -335,7 +380,6 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
             if(!scope.isPaused) { // If not paused, dynamically update chart and drawings.
               dynamicUpdateChart();
-              dynamicDrawReceivers();
             }
 
           }, true);
@@ -431,40 +475,45 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
  
             svg.selectAll("g.x.axis").call(xAxisGen);
 
-          }
- 
-          // Plot each receiver line
-          function dynamicDrawReceivers() {
-            for(var receiverTemp in scope.receivers) {
-              var isDisplayed = scope.receivers[receiverTemp].isDisplayed;
-              var color = scope.receivers[receiverTemp].color;
-              var isDrawn = scope.receivers[receiverTemp].isDrawn;
- 
-              if(isDisplayed) {
-                if(isDrawn) { //If already drawn, then we just update the data.
-                  svg.selectAll("." + 'path_' + receiverTemp)
-                    .attr({ d: lineFun(dataToPlot[receiverTemp]) }); 
+            dynamicDrawReceivers();
+
+                      // Plot each receiver line
+            function dynamicDrawReceivers() {
+              for(var receiverTemp in scope.receivers) {
+                var isDisplayed = scope.receivers[receiverTemp].isDisplayed;
+                var color = scope.receivers[receiverTemp].color;
+                var isDrawn = scope.receivers[receiverTemp].isDrawn;
+   
+                if(isDisplayed) {
+                  if(isDrawn) { //If already drawn, then we just update the data.
+                    svg.selectAll("." + 'path_' + receiverTemp)
+                      .attr({ d: lineFun(dataToPlot[receiverTemp]) }); 
+                  }
+                  else { // If not drawn, then we draw it.
+                    svg.append("svg:path")
+                      .attr({
+                        d: lineFun(dataToPlot[receiverTemp]),
+                        "stroke": color,
+                        "stroke-width": 2,
+                        "fill": "none",
+                        "class": 'path_' + receiverTemp
+                      });
+                    scope.receivers[receiverTemp].isDrawn = true;
+                  }
                 }
-                else { // If not drawn, then we draw it.
-                  svg.append("svg:path")
-                    .attr({
-                      d: lineFun(dataToPlot[receiverTemp]),
-                      "stroke": color,
-                      "stroke-width": 2,
-                      "fill": "none",
-                      "class": 'path_' + receiverTemp
-                    });
-                  scope.receivers[receiverTemp].isDrawn = true;
-                }
-              }
-              else {
-                if(isDrawn) { // If not displayed, then we need to remove the drawn receivers.
-                  svg.selectAll("." + 'path_' + receiverTemp).remove();
-                  scope.receivers[receiverTemp].isDrawn = false;
+                else {
+                  if(isDrawn) { // If not displayed, then we need to remove the drawn receivers.
+                    svg.selectAll("." + 'path_' + receiverTemp).remove();
+                    scope.receivers[receiverTemp].isDrawn = false;
+                  }
                 }
               }
             }
+
+
           }
+ 
+
         }
     }
   })
@@ -525,10 +574,10 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     $scope.isDiscovering = true;
     $scope.isPaused = false;
 
-    $scope.maxNumberOfTransmittersAccessible = DEFAUTL_MAX_TRANSMITTERS;
-    $scope.maxNumberOfTransmitters = DEFAUTL_MAX_TRANSMITTERS;
-    $scope.maxNumberOfSamplesAccessible = 10;
-    $scope.maxNumberOfSamples = 10;
+    $scope.maxNumberOfTransmittersAccessible = DEFAULT_MAX_TRANSMITTERS;
+    $scope.maxNumberOfTransmitters = DEFAULT_MAX_TRANSMITTERS;
+    $scope.maxNumberOfSamplesAccessible = DEFAULT_MAX_SAMPLES;
+    $scope.maxNumberOfSamples = DEFAULT_MAX_SAMPLES;
 
     $scope.updateChart = true; // Each time this value changes, the chart is being updated.       
 
@@ -558,17 +607,18 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     // Update the data.
     function updateFromService() {
 
-      var sample = receiverSamples.getLatest(); // Getting the latest data.
-      $scope.setReceiverConnectivity(receiverSamples.getConnectionStatus()); // Displaying whether we are connected.
+      if(!$scope.isPaused) {
+        var sample = receiverSamples.getLatest(); // Getting the latest data.
+        $scope.setReceiverConnectivity(receiverSamples.getConnectionStatus()); // Displaying whether we are connected.
 
-      // Updating transmitters.
-      if($scope.isDiscovering && ($scope.numTransmitters <= $scope.maxNumberOfTransmitters)) { // Conditionning on max transmitters and discovery mode.
-        updateTransmitters(sample); // Update transmitters.
+        // Updating transmitters.
+        if($scope.isDiscovering && ($scope.numTransmitters <= $scope.maxNumberOfTransmitters)) { // Conditionning on max transmitters and discovery mode.
+          updateTransmitters(sample); // Update transmitters.
+        }
+
+        updateRssiSamples(sample); // Updating the rssi.
+        updateDisplayData(); // Updating and processing the data passed to the directive.
       }
-
-      updateRssiSamples(sample); // Updating the rssi.
-      updateDisplayData(); // Updating and processing the data passed to the directive.
-    
 
       // Update the array of transmitters.
       function updateTransmitters(sample) {
@@ -669,7 +719,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
   .directive('barChart',  function($parse, $window) {
     return {
       restrict: "EA",
-      template: "<svg width='" + DEFAULT_RECEIVER_CANVAS_W  + "' height='" + DEFAULT_RECEIVER_CANVAS_H  + "'></svg>",
+      template: "<svg width='" + RECEIVER_CANVAS_W  + "' height='" + RECEIVER_CANVAS_H  + "'></svg>",
       link:
         function(scope, elem, attrs) {
 
@@ -682,8 +732,8 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
 
           // Display parameters (constant).
-          var canvasH = DEFAULT_RECEIVER_CANVAS_H;
-          var canvasW = DEFAULT_RECEIVER_CANVAS_W;
+          var canvasH = RECEIVER_CANVAS_H;
+          var canvasW = RECEIVER_CANVAS_W;
 
           var barsW = 10;
           var numBarsPerTransmitter = 3;
@@ -694,7 +744,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
 
           var labelW = 150;
-          var padding = 30;
+          var padding = RECEIVER_PADDING;
 
 
           // Scales and Axis.
@@ -722,13 +772,11 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
             if(!(scope.isPaused) && (sortedData.length > 0)) {
               dynamicUpdateChart(); // If we indeed have data and not paused, update chart.
-              dynamicUpdateBars(); // If we indeed have data and not paused, update bars.
             }
           }, true);
  
           // Update coming from the user. Affecting static content.
           scope.$watch(updateChartExp, function() {
-            staticUpdateBars();
             staticUpdateChart();
           }, true);
  
@@ -754,14 +802,11 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
           function staticUpdateChart() {
 
-            canvasH = DEFAULT_RECEIVER_CANVAS_H; // Resetting the canvas.
+            svg.selectAll("*").remove(); // Removing all the elements.
+            canvasH = RECEIVER_CANVAS_H; // Resetting the canvas.
             svg.attr("height", canvasH); // Enlarging the canvas.
 
             initChart();
-          }
-
-          function staticUpdateBars() {
-            svg.selectAll("*").remove(); // Removing all the elements.
           }
 
 
@@ -776,17 +821,12 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
               xAxis.attr("transform","translate(" + labelW + "," +  (canvasH - padding)+ ")") // Adjusting the xAxis.
               .call(xAxisGen);
             }
-          }
-
-          function dynamicUpdateBars() {
-
-            // Adding the new transmitters.
 
             svg.selectAll(".averageBars")
-                .data(sortedData)
-                .attr("width", function(d, i) {
-                  return xScale(d.average);
-                })
+              .data(sortedData)
+              .attr("width", function(d, i) {
+                return xScale(d.average);
+              })
               .text(function (d) { return d.latest; })
               .enter()
               .append("rect")
@@ -920,9 +960,11 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
               .text(function(d) {
                 return "Fluc " + d.instability;
               });
-            
           }
+
  
+          // --- Helper functions ---
+
           // Sort the array by average RSSI
           function sortDataByAverage() {
             sortedData = [];
@@ -979,7 +1021,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
     // Context
     $scope.apiRoot = DEFAULT_API_ROOT;
-    $scope.locationId = DEFAULT_LOCATION_ID;
+    $scope.locationId = DEFAULT_LOCATION_ID; // Need to be moved to the interaction controller at some point.
 
     // Data
     $scope.rssiSamples = {};
@@ -994,11 +1036,12 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     $scope.numberOfCellsPerSideAccessible = DEFAULT_CELL_SIDE;
     $scope.numberOfCellsPerSide = $scope.numberOfCellsPerSideAccessible;
     $scope.squaresPerMeter = 1;
-    $scope.frequencyMHz = 915;
-    $scope.scale = 'log';
+    $scope.frequencyMHz = DEFAULT_FREQUENCY;
+    $scope.scale = DEFAULT_SCALE; 
+    $scope.merger = DEFAULT_MERGER; // TWO mergers: global vs local. Right now, only local got implemented.
 
-    $scope.maxRSSI = 185;
-    $scope.minRSSI = 100;
+    $scope.maxRSSI = DEFAULT_LOCATION_MAXRSSI;
+    $scope.minRSSI = DEFAULT_LOCATION_MINRSSI;
 
     // Real-time parameters
     $scope.isDiscovering = true;
@@ -1021,25 +1064,27 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
     }
 
-    // Calling this once.
+    // Calling this once. Need to be removed once we can land on the location tab from other tabs.
     $scope.updateFromUser();
 
     function updateFromService() {
-   
-      var sample = locationSamples.getLatest(); // Getting the latest data.
- 
-      if(sample && sample[$scope.locationId]) { // Making sure the data is well-defined
-         
-        if($scope.isDiscovering) { 
-          updateReceivers(sample); // Updating the meta-data model.
-        }
- 
-        updateRssiArray(sample); // Updating the data model.
-        $scope.rssiSeconds += REFRESH_SECONDS; // Updating the data model.
- 
-      }
+
+      $scope.setLocationConnectivity(locationSamples.getConnectionStatus()); 
 
       if(!$scope.isPaused) {
+        var sample = locationSamples.getLatest(); // Getting the latest data.
+   
+        if(sample && sample[$scope.locationId]) { // Making sure the data is well-defined
+           
+          if($scope.isDiscovering) { 
+            updateReceivers(sample); // Updating the meta-data model.
+          }
+   
+          updateRssiArray(sample); // Updating the data model.
+          $scope.rssiSeconds += REFRESH_SECONDS; // Updating the data model.
+   
+        }
+      
         for(var receiverTemp in $scope.receivers) {
           var indexOfLatest = $scope.rssiSamples[receiverTemp].length -1;
           $scope.receivers[receiverTemp].latest = $scope.rssiSamples[receiverTemp][indexOfLatest].rssi;
@@ -1052,9 +1097,10 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
             for(var cRadio = 0; cRadio <  sample[$scope.locationId].radioDecodings.length; cRadio++) {
               var receiverTemp = sample[$scope.locationId].radioDecodings[cRadio].identifier.value;
               if(!(receiverTemp in $scope.receivers)) {
-                var colorTemp = DEFAULT_COLORS_ARRAY[cCOlOR++ % DEFAULT_COLORS_ARRAY.length];
+                var colorTemp = COLORS_ARRAY[cCOlOR_LOCATION++ % COLORS_ARRAY.length];
                 $scope.receivers[receiverTemp] = {color : colorTemp, isDrawn : false, isConsidered : true, isConsideredDrawn : false,
-                  isDisplayed : true, latest : 0, receiverId : receiverTemp, xCoordinate : 100, yCoordinate : 100};
+                  isDisplayed : true, latest : 0, receiverId : receiverTemp, xCoordinate : Math.floor(Math.random() * LOCATION_SIDE), 
+                  yCoordinate : Math.floor(Math.random() * LOCATION_SIDE)};
               }
             }
         }
@@ -1115,7 +1161,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 .directive('locationChart',  function($parse, $window) {
     return {
       restrict: "EA",
-      template: "<svg width='800' height='800'></svg>",
+      template: "<svg width='" + LOCATION_SIDE  + "' height='" + LOCATION_SIDE + "'></svg>",
       link:
         function(scope, elem, attrs) {
     
@@ -1125,17 +1171,20 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
           var dataToPlot = chartDataExp(scope); // Getting the data.
 
           // svg Canvas
-          var svgW = 800;
-          var svgH = 800;
+          var svgW = LOCATION_SIDE;
+          var svgH = LOCATION_SIDE;
 
           // Map parameters 
           var cellsPerMeter = scope.squaresPerMeter;
           var pixelsPerCellSide = svgW / scope.numberOfCellsPerSide; // Number of pixels on the side of a cell.
           var totalNumberOfCells = scope.numberOfCellsPerSide * scope.numberOfCellsPerSide; // Total number of cells.
 
+          // Data
           var cells;
           var cellArray = [];
+          var maxValue = 0;
 
+          // svg canvas.
           var d3 = $window.d3;
           var rawSvg = elem.find('svg');
           var svg = d3.select(rawSvg[0]);
@@ -1171,8 +1220,10 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
             totalNumberOfCells = scope.numberOfCellsPerSide * scope.numberOfCellsPerSide; // Total number of cells.
 
             // The actual initialization.
+            
             initData();
             initCells();
+            initLine();
 
             function initData() {
               for(var cCell = 0; cCell < totalNumberOfCells; cCell++) {
@@ -1198,6 +1249,26 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
                 });
             }
 
+            function initLine() {
+
+              svg.append("path")
+                .attr("d", " M 10 " + (svgH - 20) + " L " + (10 + 10 * cellsPerMeter * pixelsPerCellSide )+ " " + (svgH - 20) + "")
+                .attr("stroke", "white")
+                .attr("class","myLine")
+                .attr("font-weight", "bold")
+                .attr("stroke-width", SCALE_WIDTH)
+                .attr("fill", "none");
+
+              svg.append("text")
+                .attr("x", 2)
+                .attr("y", svgH - 30)
+                .style("font-weight", "bold")
+                .attr("font-size","20px")
+                .attr("fill", "white")
+                .text("10 m");
+               
+            }
+
           }
 
 
@@ -1214,6 +1285,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
             drawReceivers();
             updateData();
             updateCells();
+            updateLine();
 
             function updateCells() {
               svg.selectAll("rect")
@@ -1221,6 +1293,13 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
                 .style("fill", function(d,i) {
                   return valueToColor(d);
                 });
+            }
+
+            function updateLine() {
+
+              svg.select(".myLine")
+                .attr("d", " M 10 " + (svgH - 20) + " L " + (10 + 10 * cellsPerMeter * pixelsPerCellSide )+ " " + (svgH - 20) + "");
+
             }
 
             function drawReceivers() {
@@ -1245,7 +1324,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
    
                   if(isConsideredDrawn) {
                     svg.selectAll("." + 'center_' + receiverTemp)
-                      .attr("r", pixelsPerCellSide / 4)
+                      .attr("r", Math.max(pixelsPerCellSide / 4, MINIMUM_CIRCLE_SIZE))
                       .attr("cx", xCoordinate)
                       .attr("cy", yCoordinate);
                   }
@@ -1254,7 +1333,7 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
                     .attr("class", 'center_' + receiverTemp)
                     .attr("cx", xCoordinate)
                     .attr("cy", yCoordinate)
-                    .attr("r", pixelsPerCellSide / 4)
+                    .attr("r", Math.max(pixelsPerCellSide / 4, MINIMUM_CIRCLE_SIZE))
                     .style("fill", color);
                     scope.receivers[receiverTemp].isConsideredDrawn = true;
                   }
@@ -1304,6 +1383,8 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
 
           function updateData() {
 
+            maxValue = 0; // Resetting the max value.
+
             // For each cell.
             for(var cCell = 0; cCell < totalNumberOfCells; cCell++) {
 
@@ -1333,36 +1414,45 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
               // The actual update.
               cellArray[cCell] = colorValueFinal;
 
+              maxValue = Math.max(colorValueFinal, maxValue);
             }
 
-
-
-
-            function getColor(xEmitter, yEmitter, xReceiver, yReceiver, rssi) {
-
-              var receiverRadiusMeter = rssiToMeter(rssi);
-              var pixelDistance = getDistanceInPixels(xEmitter, yEmitter, xReceiver, yReceiver);
-              var distanceFromReceiverMeter = pixelsToMeters(pixelDistance);
-
-              // The following is our function which takes the radius in meter
-              // And the distance from the receiver in meter and outputs a value between 0 and 1.
-
-              if(receiverRadiusMeter === -1) {
-                return -1;
-              }
-              else {
-                return  Math.max(rssi/scope.maxRSSI - (LINEAR_FACTOR  * rssi/scope.maxRSSI * Math.abs(receiverRadiusMeter - distanceFromReceiverMeter)),0);
-              }
+            // Normalizing with the maxValue.
+          if(scope.merger === 'global') {
+            for(var cCell = 0; cCell < totalNumberOfCells; cCell++) {
+              cellArray[cCell] = cellArray[cCell]/maxValue;
             }
+          }          
+
+        }
+
+          // ***** HELPER FUNCTIONS *****
+
+          function getColor(xEmitter, yEmitter, xReceiver, yReceiver, rssi) {
+
+            var receiverRadiusMeter = rssiToMeter(rssi);
+            var pixelDistance = getDistanceInPixels(xEmitter, yEmitter, xReceiver, yReceiver);
+            var distanceFromReceiverMeter = pixelsToMeters(pixelDistance);
+
+            // The following is our function which takes the radius in meter
+            // And the distance from the receiver in meter and outputs a value between 0 and 1.
+
+            if(receiverRadiusMeter === -1) {
+              return -1;
+            }
+            else {
+              return  Math.max(rssi/scope.maxRSSI - (LINEAR_FACTOR  * rssi/scope.maxRSSI * Math.abs(receiverRadiusMeter - distanceFromReceiverMeter)),0);
+            }
+          }
 
 
+          function mergeColorValueArray(colorValueArray) {
 
+            var result = 1;
+            var dirty = false;
+            var zeros = 0;
 
-            function mergeColorValueArray(colorValueArray) {
-
-              var result = 1;
-              var dirty = false;
-              var zeros = 0;
+            if(scope.merger === 'local') {
 
               for(var cArray = 0; cArray < colorValueArray.length; cArray++) {
                 if(colorValueArray[cArray] != -1){
@@ -1385,10 +1475,30 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
               }
             }
 
+            if(scope.merger === 'global') {
+              for(var cArray = 0; cArray < colorValueArray.length; cArray++) {
+                if(colorValueArray[cArray] != -1) {
+                  result = result + colorValueArray[cArray];
+                  dirty = true;
+                }
+                else{
+                  zeros++;
+                }
+
+              }
+
+            if(dirty){
+                return result/(colorValueArray.length - zeros);
+              }
+              else
+              {
+                return 0;
+              }
+
+            }
+
 
           }
-
-          // ***** HELPER FUNCTIONS *****
 
           // --- Getters ---
 
