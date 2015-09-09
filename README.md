@@ -1,3 +1,4 @@
+
 barstool
 ========
 
@@ -13,32 +14,67 @@ Simply clone the repository and open the index.html file in your favourite web b
 Interface
 ---------
 
-Barstool presents two interfaces : Transmitter and Receiver.
+Barstool presents four interfaces : Transmitter, Receiver, Events and Location .
 
 #### Transmitter Interface
 
-The transmitter interface visualises the RSSI in real-time for each detected receivers. A line-chart is used for visualising the data. Among other options, the user can choose the range for the x and y axis in the interface. The update button restarts the visualisation with the chosen parameters. 
+The transmitter interface visualises the RSSI in real-time for each detected receivers. A line-chart is used for visualising the data.
 
-A snapshot of the transmitter interface : 
 
-![Transmitter Interface](https://cloud.githubusercontent.com/assets/12238788/8973503/5003aa2a-3633-11e5-9563-a42d6f65fd4d.png)
+| Option               | Description                 |
+|:-------------------------|:------------------------------|
+| API root       | Specifies where to pull the data from.  |
+| Transmitter ID | Specifies which transmitter to track. | 
+| RSSI window          | Specifies the lower and higher range of the graph. |
+| Samples | Specifes how many samples the graph displays. |
+| Linear Interpolation | Draws straight line between data points. |
+| Basis Interpolation       | Smooths out extreme data points. | 
+| Display receiver | Unless checked, the corresponding receiver won't be displayed. |
+| ReceiversID | When clicked upon, brings the user to the corresponding receiver interface. |
 
 #### Receiver Interface
 
-The receiver interface visualises the latest and average RSSI in real-time for each detected transmitters. A bar-chart is used for visualising the data. Among other options, the user can choose the number of data points to aggregate in the average. The update button restarts the visualisation with the chosen parameters.
+The receiver interface visualises the latest, average and average fluctuation of the RSSI in real-time for each detected transmitters.
 
-A snapshot of the receiver interface : 
 
-![Receiver Interface](https://cloud.githubusercontent.com/assets/12238788/8973517/6a39ea8a-3633-11e5-9838-d8b70477e7c7.png)
+The receiver interface visualises the latest, average and fluctuation of the RSSI in real-time for each detected transmitters. A bar-chart is used for visualising the data.
 
-Both interfaces offer a pause button for facilitating screenshots and a stop-discovering button to restrict the visualisation to the already detected devices.
+| Option               | Description                 |
+|:-------------------------|:------------------------------|
+| API root       | Specifies where to pull the data from.  |
+| Receiver ID | Specifies which receiver to decode. |
+| Samples | Specifes how many samples to average over. |
+| Max          | Maximum number of transmitters to be tracked. |
+| TransmittersID | When clicked upon, brings the user to the corresponding transmitter interface. |
+
+#### Events Interface
+
+Coming soon!
+
+#### Location Interface
+The location interface visualize the real-time location of a transmitter through a heat map. The more red a cell is, the more likely the transmitter is located near it. The more black the cell is, the less likely the transmitter is located near it. Each transmitter's location is indicated by a colored disk; its radius is indicated by a halo of the same color. A 10m-scale is located at the botto left of the grid in order to help the users calibrate the relative receiver's relative position.
+
+| Option               | Description                 |
+|:-------------------------|:------------------------------|
+| API root       | Specifies where to pull the data from.  |
+| TransmitterID | Specifies which transmitter to locate. |
+| Cells/Side | Specifes the resolution of the grid. |
+| Considered          | Unless toggled on, the heat map won't take the receiver's data into consideration. |
+| Visualized | Unless toggled on, the heat map won't show the receiver's radius. |
+| X position      | Defines the transmitter's position by specifiying its distance in pixels from the left edge. |
+| Y position      | Defines the transmitter's position by specifiying its distance in pixels from the upper edge. |
+| Squares/metre | How many cells are contained in a meter. |
+| minRSSI         | Below this threshold, the transmitter is considered to be absent. |
+| maxRSSI | The RSSI associated to the transmitter when it's adjacent to a receiver. |
+| Frequency | Defines the conversion RSSI to meter according to the emitted signal's frequency. (2400MHz = BlueTooth, 915MHz = reelyActive RFID) |
+| Scale | Defines the conversion RSSI to meter. Potential for user defined conversion. |
+| Perspective | Global : The heat map shows as much data as possible. Local : The heat map infers the most likely position.
 
 
 What's next?
 ------------
 
 * An event interface.
-* The option to move and update between the transmitter and receiver interfaces through clicking on the transmitter/receiver we want to visualise in the other interface.
 * Displaying blink rates.
 * The option to choose the polling rate.
 
@@ -61,5 +97,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
-
-
