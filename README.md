@@ -29,6 +29,8 @@ Barstool presents four interfaces:
 
 The transmitter interface visualises a single radio transmitter.  The real-time RSSI on all receivers in range is displayed as a line chart.
 
+![Transmitter Interface](http://reelyactive.github.io/barstool/images/transmitterInterface.png)
+
 | Setting              | Description                                         |
 |:---------------------|:----------------------------------------------------|
 | Transmitter ID       | Specifies which transmitter to observe.             | 
@@ -46,6 +48,8 @@ The transmitter interface visualises a single radio transmitter.  The real-time 
 #### Receiver Interface
 
 The receiver interface visualises a single radio receiver.  The real-time RSSI for each detected transmitter is displayed as a bar chart.  This includes the latest (orange), average (blue) and fluctuation (grey) of the RSSI.
+
+![Receiver Interface](http://reelyactive.github.io/barstool/images/receiverInterface.png)
 
 | Setting     | Description                                                  |
 |:------------|:-------------------------------------------------------------|
@@ -71,6 +75,8 @@ The location interface visualises a single radio transmitter on a two-dimensiona
 Each receiver's location is represented by a colored dot.  A halo surrounding the dot represents the most likely locations of the transmitter based on an idealised RSSI-to-range calculation.  In a perfect world (which any radio engineer will adamantly argue does _not_ exist), the transmitter would be located at the intersection of all the halos.
 
 The grid is represented as a square 800 pixels on each side.  Note that the X and Y coordinates of each receiver are given in _pixels_ while the scale of the grid is given by the Squares/metre parameter.  The 10m scale indication at the bottom-left of the grid is helpful for positioning the receivers as per their relative physical locations.
+
+![Location Interface](http://reelyactive.github.io/barstool/images/locationInterface.png)
 
 | Setting        | Description                                               |
 |:---------------|:----------------------------------------------------------|
