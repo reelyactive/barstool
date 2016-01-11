@@ -2,12 +2,13 @@
 <html>
   <head>
     <title> reelyActive barstool </title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style/main.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.1/angular.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.1/ui-bootstrap-tpls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.7/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap-tpls.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.7/socket.io.min.js"></script>
     <script type="text/javascript" src="js/socket.js"></script>
     <script type="text/javascript" src="js/state.js"></script>
   </head>
@@ -31,332 +32,366 @@
              ng-click="navCollapsed = true">
         </div>
       </nav>
-      <tabset>
+      <div class="container-fluid">
+        <tabset>
 
-        <!----- Transmitter Interface ----->
-        <tab heading="Transmitter" active="tabs[0].active"> 
-          <div ng-controller="ChartCtrl">
-            <h1>{{transmitterId}} 
-              <small>is {{transmitterConnectivity? 'decoded by these nearby receivers': 'not responding.'}}
-              </small>
-            </h1>
-            <div collapse="isTransmitterSettingsCollapsed">
-              <div class="well well-lg">
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="tID">Transmitter ID:</label>
-                    <input id="tID" type="text" ng-model="transmitterId" class="form-control" size="17" maxlength="16"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="tMin">&nbsp; Min RSSI:</label>
-                    <input id="tMin" type="text" ng-model="minRSSI" class="form-control" size="3" maxlength="3"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="tMax">&nbsp; Max RSSI:</label>
-                    <input id="tMax" type="text" ng-model="maxRSSI" class="form-control" size="3" maxlength="3"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="tSamples">&nbsp; Samples:</label>
-                    <input id="tSamples" type="text" ng-model="maxNumberOfSamplesAccessible" class="form-control" size="2" maxlength="2"/>
-                  </div>
-                  <div class="form-group btn-group">
-                    <label class="btn btn-default" ng-model="interpolate"
-                           btn-radio="'Linear'">Linear Interpolation</label>
-                    <label class="btn btn-default" ng-model="interpolate"
-                           btn-radio="'basis'">Basis Interpolation</label>
-                  </div>
-                </form>
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="tAPI">API Root:</label>
-                    <input id="tAPI" type="text" ng-model="apiRoot" class="form-control" size="36"/>
-                  </div>
-                  <div class="form-group">
-                    <button ng-click="updateFromUser()"
-                            class="btn btn-primary"> Apply Settings </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <p>
-              <button class="btn btn-primary"
-                      ng-click="isTransmitterSettingsCollapsed =
-                                !isTransmitterSettingsCollapsed">
-                {{isTransmitterSettingsCollapsed? 'Show Settings' :
-                                                  'Hide Settings'}}
-              </button>
-              <button ng-click="isDiscovering = !isDiscovering" class="btn
-                      ngclass: {{isDiscovering? 'btn-success' :
-                                                'btn-warning'}}">
-                {{isDiscovering? 'Discovering Receivers' :
-                                 'Discovery Disabled'}}
-              </button>
-              <button ng-click="isPaused = !isPaused" class="btn
-                      ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
-                {{isPaused? 'Paused' : 'Running'}}
-              </button>
-            </p>
-            <div class="row">
-              <div class="col-md-9" linear-chart chart-data="rssiSamples" update-chart="updateChart"></div>
-              <div class="col-md-3">
-                <div class="row">
-                  <div class="col-md-2"> <h3> Vis </h3> </div>
-                  <div class="col-md-6"> <h3> Receiver ID </h3> </div>
-                  <div class="col-md-4"> <h3> RSSI </h3> </div>
-                </div>
-                <div class="row" ng-repeat="receiver in receivers">
-                  <div class="col-md-2">
-                    <button ng-style="{'background-color': receiver.isDisplayed? receiver.color : '#eee'}" class="btn" 
-                            ng-click="receiver.isDisplayed = !receiver.isDisplayed">
-                    </button>
-                  </div>
-                  <div class="col-md-6">
-                    <a ng-click="goToReceiverTab(receiver.receiverId)">
-                      {{receiver.receiverId}}
-                    </a>
-                  </div>
-                  <div class="col-md-4"> {{receiver.latest}} </div>
-                </div>
-              </div>           
-            </div>
-          </div>
-        </tab>
-
-        <!----- Receiver Interface ----->
-        <tab heading="Receiver" active="tabs[1].active"> 
-          <div ng-controller="BarCtrl">
-            <h1>{{receiverId}} 
-              <small>is {{receiverConnectivity? 'decoding these nearby transmitters' : 'not responding.'}}
-              </small></h1>
-            <div collapse="isReceiverSettingsCollapsed">
-              <div class="well well-lg">
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="rID">Receiver ID:</label>
-                    <input id="rID" type="text" ng-model="receiverId" class="form-control" size="17" maxlength="16"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="rSamples">&nbsp; Samples:</label>
-                    <input id="rSamples" type="text" ng-model="maxNumberOfSamplesAccessible" class="form-control" size="2" maxlength="2"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="rTransmitters">&nbsp; Max :</label>
-                    <input id="rTransmitters" type="text" ng-model="maxNumberOfTransmittersAccessible" class="form-control" size="2" maxlength="2"/>
-                  </div>
-                </form>
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="tAPI">API Root:</label>
-                    <input id="tAPI" type="text" ng-model="apiRoot" class="form-control" size="36"/>
-                  </div>
-                  <div class="form-group">
-                    <button ng-click="updateFromUser()"
-                            class="btn btn-primary"> Apply Settings </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <p>
-              <button class="btn btn-primary"
-                      ng-click="isReceiverSettingsCollapsed = 
-                                !isReceiverSettingsCollapsed">
-                {{isReceiverSettingsCollapsed? 'Show Settings' :
-                                               'Hide Settings'}}
-              </button>
-              <button ng-click="isDiscovering = !isDiscovering" class="btn
-                      ngclass: {{isDiscovering? 'btn-success' :
-                                                'btn-warning'}}">
-                {{isDiscovering? 'Discovering Transmitters' :
-                                 'Discovery Disabled'}}
-              </button>
-              <button ng-click="isPaused = !isPaused" class="btn
-                      ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
-                {{isPaused? 'Paused' : 'Running'}}
-              </button>
-            </p>
-            <div bar-chart chart-data= "displayData" update-chart="updateChart"></div>
-          </div>
-        </tab>
-
-        <!----- Events Interface ----->
-        <tab heading="Events" active="tabs[2].active"> 
-          <div ng-controller="SocketCtrl" >
-            <h1>Real-time Events <small>thanks to the magic of websockets</small></h1>
-            <div collapse="isEventsSettingsCollapsed">
-              <div class="well well-lg">
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="eAPI">Websocket URL:</label>
-                    <input id="eAPI" type="text" ng-model="socket.url" class="form-control" size="64" readonly/>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <p>
-              <button class="btn btn-primary"
-                      ng-click="isEventsSettingsCollapsed = 
-                                !isEventsSettingsCollapsed">
-                {{isEventsSettingsCollapsed? 'Show Settings' :
-                                             'Hide Settings'}}
-              </button>
-            </p>
-            <div ng-repeat="(id, event) in events">
-              <div>
-                <pre> {{id}}: {{event}} </pre>
-              </div>
-            </div>
-          </div>
-        </tab>
-
-        <!----- Location Interface ----->
-        <tab heading="Location" active="tabs[3].active"> 
-          <div ng-controller="LocationCtrl" >
-            <h1>{{locationId}} <small>{{locationConnectivity?
-                'where are you?': 'is not responding.'}}</small></h1>
-            <div collapse="isLocationSettingsCollapsed">
-              <div class="well well-lg">
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="lID">Transmitter ID:</label>
-                    <input id="lID" type="text" ng-model="locationId"
-                           class="form-control" size="17" maxlength="16"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="lCells">&nbsp; Cells/side:</label>
-                    <input id="lCells" type="text" class="form-control"
-                           ng-model="numberOfCellsPerSideAccessible" size="3"
-                           maxlength="3"/>
-                  </div>
-                </form>
-                <br>
-                <form class="form-inline">
-                  <div class="form-group">
-                    <label for="tAPI">API Root:</label>
-                    <input id="tAPI" type="text" ng-model="apiRoot" class="form-control" size="36"/>
-                  </div>
-                  <div class="form-group">
-                    <button ng-click="updateFromUser()"
-                            class="btn btn-primary"> Apply Settings </button>
-                    
-                  </div>
-                </form>
-              </div>
-            </div>
-            <p>
-              <button class="btn btn-primary"
-                      ng-click="isLocationSettingsCollapsed = 
-                                !isLocationSettingsCollapsed">
-                {{isLocationSettingsCollapsed? 'Show Settings' :
-                                               'Hide Settings'}}
-              </button>
-              <button ng-click="isDiscovering = !isDiscovering"
-                      class="btn ngclass: {{isDiscovering? 'btn-success' :
-                                                           'btn-warning'}}">
-                {{isDiscovering? 'Discovering Receivers' :
-                                 'Discovery Disabled'}}
-              </button>
-              <button ng-click="isPaused = !isPaused" class="btn
-                      ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
-                {{isPaused? 'Paused' : 'Running'}}
-              </button>
-            </p>
-            <!-- Visualisation code goes here -->
-            <div class="row">
-              <div class="col-md-8" location-chart chart-data="rssiSamples" update-chart="updateChart"></div>
-              <div class="col-md-4">
-                <div class="row">
-                  <div class="col-md-2 text-right"> <h3> Vis </h3> </div>
-                  <div class="col-md-4"> <h3> Receiver ID </h3> </div>
-                  <div class="col-md-2"> <h3> RSSI </h3> </div>
-                  <div class="col-md-2"> <h3> &nbsp; X </h3> </div>
-                  <div class="col-md-2"> <h3> &nbsp; Y </h3> </div>
-                </div>
-                <div class="row" data-ng-repeat="receiver in receivers">
-                  <div class="col-md-1">
-                    <span ng-style="{'color': receiver.isConsidered?
-                                              '#5a5a5a' : '#ccc'}"
-                          ng-click="receiver.isConsidered = 
-                                    !receiver.isConsidered">
-                      {{ receiver.isConsidered? '&oplus;' : '&odot;' }}
-                    </span>
-                  </div>
-                  <div class="col-md-1">
-                    <button class="btn" ng-style="{'background-color':
-                            receiver.isDisplayed? receiver.color : '#eee'}"  
-                            ng-click="receiver.isDisplayed = 
-                                      !receiver.isDisplayed">
-                    </button>
-                  </div>
-                  <div class="col-md-4">
-                    <a ng-click="goToReceiverTab(receiver.receiverId)">
-                      {{receiver.receiverId}}
-                    </a>
-                  </div>
-                  <div class="col-md-2"> {{receiver.latest}} </div>
-                  <div class="col-md-2">
-                    <input type="text" ng-model="receiver.xCoordinate" class="form-control input-sm" size="2" maxlength="3"/>
-                  </div>
-                  <div class="col-md-2">
-                    <input type="text" ng-model="receiver.yCoordinate" class="form-control input-sm" size="2" maxlength="3"/>
-                  </div>
-                </div>
-                <div class="row">
-                  <hr>
+          <!----- Transmitter Interface ----->
+          <tab heading="Transmitter" active="tabs[0].active"> 
+            <div ng-controller="ChartCtrl">
+              <h1>{{transmitterId}} 
+                <small>
+                  is {{transmitterConnectivity? 'decoded by these nearby
+                       receivers': 'not responding.'}}
+                </small>
+              </h1>
+              <div collapse="isTransmitterSettingsCollapsed">
+                <div class="well well-lg">
                   <form class="form-inline">
                     <div class="form-group">
-                      <label for="lSquares">&nbsp; Squares/metre:</label>
-                      <input id="lSquares" type="text" class="form-control"
-                             ng-model="squaresPerMeter" size="3"
-                             maxlength="3"/>
+                      <label for="tID">Transmitter ID:</label>
+                      <input id="tID" type="text" ng-model="transmitterId"
+                             class="form-control" size="17" maxlength="16"/>
                     </div>
                     <div class="form-group">
-                      <label for="lMin">&nbsp; Min RSSI:</label>
-                      <input id="lMin" type="text" ng-model="minRSSI"
+                      <label for="tMin">&nbsp; Min RSSI:</label>
+                      <input id="tMin" type="text" ng-model="minRSSI"
                              class="form-control" size="3" maxlength="3"/>
                     </div>
                     <div class="form-group">
-                      <label for="lMax">&nbsp; Max RSSI:</label>
-                      <input id="lMax" type="text" ng-model="maxRSSI"
+                      <label for="tMax">&nbsp; Max RSSI:</label>
+                      <input id="tMax" type="text" ng-model="maxRSSI"
                              class="form-control" size="3" maxlength="3"/>
+                    </div>
+                    <div class="form-group">
+                      <label for="tSamples">&nbsp; Samples:</label>
+                      <input id="tSamples" type="text"
+                             ng-model="maxNumberOfSamplesAccessible"
+                             class="form-control" size="2" maxlength="2"/>
+                    </div>
+                    <div class="form-group btn-group">
+                      <label class="btn btn-default" ng-model="interpolate"
+                             btn-radio="'Linear'">Linear Interpolation</label>
+                      <label class="btn btn-default" ng-model="interpolate"
+                             btn-radio="'basis'">Basis Interpolation</label>
                     </div>
                   </form>
-                  <hr>
-                  <form class="form-horizontal">
-                    <div class="col-sm-3"> <label> Frequency: </label> </div>
-                    <div class="form-group btn-group col-md-9">
-                      <label class="btn btn-default" ng-model="frequencyMHz"
-                             btn-radio="2400">2400MHz</label>
-                      <label class="btn btn-default" ng-model="frequencyMHz"
-                             btn-radio="915">915MHz</label>
+                  <br>
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="tAPI">API Root:</label>
+                      <input id="tAPI" type="text" ng-model="apiRoot"
+                             class="form-control" size="36"/>
                     </div>
-                    <div class="col-sm-3"> <label> Scale: </label> </div>
-                    <div class="form-group btn-group col-md-9">
-                      <label class="btn btn-default" ng-model="scale"
-                             btn-radio="'log'">Log</label>
-                      <label class="btn btn-default" ng-model="scale"
-                             btn-radio="'home'">Home</label>
-                    </div>
-                    <div class="col-sm-3"> <label> Perspective: </label> </div>
-                    <div class="form-group btn-group col-md-9">
-                      <label class="btn btn-default" ng-model="merger"
-                             btn-radio="'global'">Global</label>
-                      <label class="btn btn-default" ng-model="merger"
-                             btn-radio="'local'">Local</label>
+                    <div class="form-group">
+                      <button ng-click="updateFromUser()"
+                              class="btn btn-primary"> Apply Settings </button>
                     </div>
                   </form>
                 </div>
-              </div>           
+              </div>
+              <p>
+                <button class="btn btn-primary"
+                        ng-click="isTransmitterSettingsCollapsed =
+                                  !isTransmitterSettingsCollapsed">
+                  {{isTransmitterSettingsCollapsed? 'Show Settings' :
+                                                    'Hide Settings'}}
+                </button>
+                <button ng-click="isDiscovering = !isDiscovering" class="btn
+                        ngclass: {{isDiscovering? 'btn-success' :
+                                                  'btn-warning'}}">
+                  {{isDiscovering? 'Discovering Receivers' :
+                                   'Discovery Disabled'}}
+                </button>
+                <button ng-click="isPaused = !isPaused" class="btn
+                        ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
+                  {{isPaused? 'Paused' : 'Running'}}
+                </button>
+              </p>
+              <div class="row">
+                <div class="col-md-9" linear-chart chart-data="rssiSamples"
+                     update-chart="updateChart"></div>
+                <div class="col-md-3">
+                  <div class="row">
+                    <div class="col-md-2"> <h3> Vis </h3> </div>
+                    <div class="col-md-6"> <h3> Receiver ID </h3> </div>
+                    <div class="col-md-4"> <h3> RSSI </h3> </div>
+                  </div>
+                  <div class="row" ng-repeat="receiver in receivers">
+                    <div class="col-md-2">
+                      <button ng-style="{'background-color':
+                                         receiver.isDisplayed?
+                                         receiver.color : '#eee'}" 
+                              ng-click="receiver.isDisplayed = 
+                                        !receiver.isDisplayed" class="btn">
+                      </button>
+                    </div>
+                    <div class="col-md-6">
+                      <a ng-click="goToReceiverTab(receiver.receiverId)">
+                        {{receiver.receiverId}}
+                      </a>
+                    </div>
+                    <div class="col-md-4"> {{receiver.latest}} </div>
+                  </div>
+                </div>           
+              </div>
             </div>
-          </div>
-        </tab>
-      </tabset>
+          </tab>
+
+          <!----- Receiver Interface ----->
+          <tab heading="Receiver" active="tabs[1].active"> 
+            <div ng-controller="BarCtrl">
+              <h1>{{receiverId}} 
+                <small>is {{receiverConnectivity? 'decoding these nearby transmitters' : 'not responding.'}}
+                </small></h1>
+              <div collapse="isReceiverSettingsCollapsed">
+                <div class="well well-lg">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="rID">Receiver ID:</label>
+                      <input id="rID" type="text" ng-model="receiverId"
+                             class="form-control" size="17" maxlength="16"/>
+                    </div>
+                    <div class="form-group">
+                      <label for="rSamples">&nbsp; Samples:</label>
+                      <input id="rSamples" type="text"
+                             ng-model="maxNumberOfSamplesAccessible"
+                             class="form-control" size="2" maxlength="2"/>
+                    </div>
+                    <div class="form-group">
+                      <label for="rTransmitters">&nbsp; Max :</label>
+                      <input id="rTransmitters" type="text"
+                             ng-model="maxNumberOfTransmittersAccessible"
+                             class="form-control" size="2" maxlength="2"/>
+                    </div>
+                  </form>
+                  <br>
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="tAPI">API Root:</label>
+                      <input id="tAPI" type="text" ng-model="apiRoot"
+                             class="form-control" size="36"/>
+                    </div>
+                    <div class="form-group">
+                      <button ng-click="updateFromUser()"
+                              class="btn btn-primary"> Apply Settings </button>
+                    </div>
+                 </form>
+                </div>
+              </div>
+              <p>
+                <button class="btn btn-primary"
+                        ng-click="isReceiverSettingsCollapsed = 
+                                  !isReceiverSettingsCollapsed">
+                  {{isReceiverSettingsCollapsed? 'Show Settings' :
+                                                 'Hide Settings'}}
+                </button>
+                <button ng-click="isDiscovering = !isDiscovering" class="btn
+                        ngclass: {{isDiscovering? 'btn-success' :
+                                                  'btn-warning'}}">
+                  {{isDiscovering? 'Discovering Transmitters' :
+                                   'Discovery Disabled'}}
+                </button>
+                <button ng-click="isPaused = !isPaused" class="btn
+                        ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
+                  {{isPaused? 'Paused' : 'Running'}}
+                </button>
+              </p>
+              <div bar-chart chart-data= "displayData"
+                   update-chart="updateChart"></div>
+            </div>
+          </tab>
+
+          <!----- Events Interface ----->
+          <tab heading="Events" active="tabs[2].active"> 
+            <div ng-controller="SocketCtrl" >
+              <h1>Real-time Events
+                  <small>thanks to the magic of websockets</small></h1>
+              <div collapse="isEventsSettingsCollapsed">
+                <div class="well well-lg">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="eAPI">Websocket URL:</label>
+                      <input id="eAPI" type="text" ng-model="socket.url"
+                             class="form-control" size="64" readonly/>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <p>
+                <button class="btn btn-primary"
+                        ng-click="isEventsSettingsCollapsed = 
+                                  !isEventsSettingsCollapsed">
+                  {{isEventsSettingsCollapsed? 'Show Settings' :
+                                               'Hide Settings'}}
+                </button>
+              </p>
+              <div ng-repeat="(id, event) in events">
+                <div>
+                  <pre> {{id}}: {{event}} </pre>
+                </div>
+              </div>
+            </div>
+          </tab>
+
+          <!----- Location Interface ----->
+          <tab heading="Location" active="tabs[3].active"> 
+            <div ng-controller="LocationCtrl" >
+              <h1>{{locationId}} <small>{{locationConnectivity?
+                  'where are you?': 'is not responding.'}}</small></h1>
+              <div collapse="isLocationSettingsCollapsed">
+                <div class="well well-lg">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="lID">Transmitter ID:</label>
+                      <input id="lID" type="text" ng-model="locationId"
+                             class="form-control" size="17" maxlength="16"/>
+                    </div>
+                    <div class="form-group">
+                      <label for="lCells">&nbsp; Cells/side:</label>
+                      <input id="lCells" type="text" class="form-control"
+                             ng-model="numberOfCellsPerSideAccessible" size="3"
+                             maxlength="3"/>
+                    </div>
+                  </form>
+                  <br>
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label for="tAPI">API Root:</label>
+                      <input id="tAPI" type="text" ng-model="apiRoot"
+                             class="form-control" size="36"/>
+                    </div>
+                    <div class="form-group">
+                      <button ng-click="updateFromUser()"
+                              class="btn btn-primary"> Apply Settings </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <p>
+                <button class="btn btn-primary"
+                        ng-click="isLocationSettingsCollapsed = 
+                                  !isLocationSettingsCollapsed">
+                  {{isLocationSettingsCollapsed? 'Show Settings' :
+                                                 'Hide Settings'}}
+                </button>
+                <button ng-click="isDiscovering = !isDiscovering"
+                        class="btn ngclass: {{isDiscovering? 'btn-success' :
+                                                             'btn-warning'}}">
+                  {{isDiscovering? 'Discovering Receivers' :
+                                   'Discovery Disabled'}}
+                </button>
+                <button ng-click="isPaused = !isPaused" class="btn
+                        ngclass: {{isPaused? 'btn-warning' : 'btn-success'}}">
+                  {{isPaused? 'Paused' : 'Running'}}
+                </button>
+              </p>
+              <!-- Visualisation code goes here -->
+              <div class="row">
+                <div class="col-md-8" location-chart chart-data="rssiSamples"
+                     update-chart="updateChart"></div>
+                <div class="col-md-4">
+                  <div class="row">
+                    <div class="col-md-2 text-right"> <h3> Vis </h3> </div>
+                    <div class="col-md-4"> <h3> Receiver ID </h3> </div>
+                    <div class="col-md-2"> <h3> RSSI </h3> </div>
+                    <div class="col-md-2"> <h3> &nbsp; X </h3> </div>
+                    <div class="col-md-2"> <h3> &nbsp; Y </h3> </div>
+                  </div>
+                  <div class="row" data-ng-repeat="receiver in receivers">
+                    <div class="col-md-1">
+                      <span ng-style="{'color': receiver.isConsidered?
+                                                '#5a5a5a' : '#ccc'}"
+                            ng-click="receiver.isConsidered = 
+                                      !receiver.isConsidered">
+                        {{ receiver.isConsidered? '&oplus;' : '&odot;' }}
+                      </span>
+                    </div>
+                    <div class="col-md-1">
+                      <button class="btn" ng-style="{'background-color':
+                              receiver.isDisplayed? receiver.color : '#eee'}"  
+                              ng-click="receiver.isDisplayed = 
+                                        !receiver.isDisplayed">
+                      </button>
+                    </div>
+                    <div class="col-md-4">
+                      <a ng-click="goToReceiverTab(receiver.receiverId)">
+                        {{receiver.receiverId}}
+                      </a>
+                    </div>
+                    <div class="col-md-2"> {{receiver.latest}} </div>
+                    <div class="col-md-2">
+                      <input type="text" ng-model="receiver.xCoordinate"
+                             class="form-control input-sm" size="2"
+                             maxlength="3"/>
+                    </div>
+                    <div class="col-md-2">
+                      <input type="text" ng-model="receiver.yCoordinate"
+                             class="form-control input-sm" size="2"
+                             maxlength="3"/>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <hr>
+                    <form class="form-inline">
+                      <div class="form-group">
+                        <label for="lSquares">&nbsp; Squares/metre:</label>
+                        <input id="lSquares" type="text" class="form-control"
+                               ng-model="squaresPerMeter" size="3"
+                               maxlength="3"/>
+                      </div>
+                      <div class="form-group">
+                        <label for="lMin">&nbsp; Min RSSI:</label>
+                        <input id="lMin" type="text" ng-model="minRSSI"
+                               class="form-control" size="3" maxlength="3"/>
+                      </div>
+                      <div class="form-group">
+                        <label for="lMax">&nbsp; Max RSSI:</label>
+                        <input id="lMax" type="text" ng-model="maxRSSI"
+                               class="form-control" size="3" maxlength="3"/>
+                      </div>
+                    </form>
+                    <hr>
+                    <form class="form-horizontal">
+                      <div class="col-sm-3"> <label> Frequency: </label> </div>
+                      <div class="form-group btn-group col-md-9">
+                        <label class="btn btn-default" ng-model="frequencyMHz"
+                               btn-radio="2400">2400MHz</label>
+                        <label class="btn btn-default" ng-model="frequencyMHz"
+                               btn-radio="915">915MHz</label>
+                      </div>
+                      <div class="col-sm-3"> <label> Scale: </label> </div>
+                      <div class="form-group btn-group col-md-9">
+                        <label class="btn btn-default" ng-model="scale"
+                               btn-radio="'log'">Log</label>
+                        <label class="btn btn-default" ng-model="scale"
+                               btn-radio="'home'">Home</label>
+                      </div>
+                      <div class="col-sm-3">
+                        <label> Perspective: </label>
+                      </div>
+                      <div class="form-group btn-group col-md-9">
+                        <label class="btn btn-default" ng-model="merger"
+                               btn-radio="'global'">Global</label>
+                        <label class="btn btn-default" ng-model="merger"
+                               btn-radio="'local'">Local</label>
+                      </div>
+                    </form>
+                  </div>
+                </div>           
+              </div>
+            </div>
+          </tab>
+        </tabset>
+      </div>
+      <footer class="footer">
+        <a href="https://github.com/reelyactive/barstool"> barstool </a>
+        &nbsp; | &nbsp;
+        <a href="http://context.reelyactive.com"
+           tooltip="We believe in an open Internet of Things"
+           tooltip-placement="right">
+          &copy; reelyActive 2015-2016
+        </a>
+      </footer>
     </div>
-    <footer class="footer">
-      <a href="https://github.com/reelyactive/barstool"> barstool </a>
-      &nbsp; | &nbsp;
-      <a href="http://context.reelyactive.com"> &copy; reelyActive 2015-2016 </a>
-    </footer>
   </body>
 </html>
