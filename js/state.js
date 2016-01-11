@@ -137,22 +137,30 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
   // ----- Socket.io controller -----
   .controller('SocketCtrl', function($scope, Socket) {
     $scope.isEventsSettingsCollapsed = true;
-    $scope.socket = { url: DEFAULT_SOCKET_URL };
+    $scope.socket = { url: DEFAULT_SOCKET_URL,
+                      appearances: 0,
+                      displacements: 0,
+                      disappearances: 0,
+                      keepalives: 0 };
     $scope.events = [];
  
     Socket.on('appearance', function(event) {
+      $scope.socket.appearances++;
       event.type = 'appearance';
       addEvent(event);
     });
     Socket.on('displacement', function(event) {
+      $scope.socket.displacements++;
       event.type = 'displacement';
       addEvent(event);
     });
     Socket.on('disappearance', function(event) {
+      $scope.socket.disappearances++;
       event.type = 'disappearance';
       addEvent(event);
     });
     Socket.on('keep-alive', function(event) {
+      $scope.socket.keepalives++;
       event.type = 'keep-alive';
       addEvent(event);
     });

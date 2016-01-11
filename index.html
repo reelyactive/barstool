@@ -226,6 +226,26 @@
                 </button>
               </p>
               <table class="table table-hover">
+                <caption> STATISTICS </caption>
+                <thead>
+                  <tr>
+                    <th> Appearances </th>
+                    <th> Keep-Alives </th>
+                    <th> Displacements </th>
+                    <th> Disappearances </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td> {{socket.appearances}} </td>
+                    <td> {{socket.keepalives}} </td>
+                    <td> {{socket.displacements}} </td>
+                    <td> {{socket.disappearances}} </td>
+                  </tr>
+                </tbody>
+              </table>
+              <table class="table table-hover">
+                <caption> REAL-TIME EVENT STREAM </caption>
                 <thead>
                   <tr>
                     <th> Transmitter ID </th>
