@@ -19,7 +19,7 @@
 
   // User default values
   DEFAULT_API_ROOT = 'http://www.hyperlocalcontext.com';
-  DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + '/websocket';
+  DEFAULT_SOCKET_URL = DEFAULT_API_ROOT + '/reelyactive';
   DEFAULT_MIN_RSSI = 0;
   DEFAULT_MAX_RSSI = 200;
   DEFAULT_MAX_SAMPLES = 10;
@@ -140,17 +140,21 @@ angular.module('state', [ 'ui.bootstrap', 'btford.socket-io' ])
     $scope.socket = { url: DEFAULT_SOCKET_URL };
     $scope.events = [];
  
-    Socket.on('appearance', function(tiraid) {
-      addEvent({ type: 'appearance', tiraid: tiraid });
+    Socket.on('appearance', function(event) {
+      event.type = 'appearance';
+      addEvent(event);
     });
-    Socket.on('displacement', function(tiraid) {
-      addEvent({ type: 'displacement', tiraid: tiraid });
+    Socket.on('displacement', function(event) {
+      event.type = 'displacement';
+      addEvent(event);
     });
-    Socket.on('disappearance', function(tiraid) {
-      addEvent({ type: 'disappearance', tiraid: tiraid });
+    Socket.on('disappearance', function(event) {
+      event.type = 'disappearance';
+      addEvent(event);
     });
-    Socket.on('keep-alive', function(tiraid) {
-      addEvent({ type: 'keep-alive', tiraid: tiraid });
+    Socket.on('keep-alive', function(event) {
+      event.type = 'keep-alive';
+      addEvent(event);
     });
     Socket.on('error', function(err, data) {
       console.log('Socket Error: ' + err + ' - ' + data);

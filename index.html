@@ -225,11 +225,30 @@
                                                'Hide Settings'}}
                 </button>
               </p>
-              <div ng-repeat="(id, event) in events">
-                <div>
-                  <pre> {{id}}: {{event}} </pre>
-                </div>
-              </div>
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th> Transmitter ID </th>
+                    <th> Event </th>
+                    <th> Strongest Receiver ID </th>
+                    <th> RSSI </th>
+                    <th> Timestamp </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="(id, event) in events">
+                    <td> <tt> {{event.tiraid.identifier.value}} </tt> </td>
+                    <td> {{event.type}} </td>
+                    <td>
+                      <tt>
+                        {{event.tiraid.radioDecodings[0].identifier.value}}
+                      </tt>
+                    </td>
+                    <td> {{event.tiraid.radioDecodings[0].rssi}} </td>
+                    <td> {{event.tiraid.timestamp}} </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </tab>
 
